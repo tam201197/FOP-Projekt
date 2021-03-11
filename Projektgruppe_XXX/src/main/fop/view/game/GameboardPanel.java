@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 /**
  * 
  * Stellt das Wegelabyrinth dar.
+ * Hi tam
  *
  */
 @SuppressWarnings("serial")
