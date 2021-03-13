@@ -35,6 +35,7 @@ public class Graph<V> {
 	 */
 	public void addVertex(V v) {
 		// TODO Aufgabe 4.1.1
+		G.put(v, new HashSet<V>());
 	}
 	
 	/**
@@ -46,7 +47,18 @@ public class Graph<V> {
 	 */
 	public boolean addEdge(V x, V y) {
 		// TODO Aufgabe 4.1.1
-		return false;
+		if(G.containsKey(x) && G.get(x).contains(y)) {
+			return false; 
+		}
+		if(!G.containsKey(y)) {
+			addVertex(y);
+		} 
+		if(!G.containsKey(x)) {
+			addVertex(x);
+		}
+		G.get(x).add(y);
+		G.get(y).add(x);
+		return true;
 	}
 	
 	
@@ -60,7 +72,13 @@ public class Graph<V> {
 	 */
 	public boolean removeVertex(V v) {
 		// TODO Aufgabe 4.1.1
-		return false;
+		if(!G.containsKey(v)) {
+			return false;
+		}
+		Set<V> set = G.get(v);
+		set.forEach(x -> G.get(x).remove(v));
+		G.remove(v);
+		return true;
 	}
 	
 	/**
@@ -72,6 +90,11 @@ public class Graph<V> {
 	 */
 	public boolean removeEdge(V x, V y) {
 		// TODO Aufgabe 4.1.1
+		if(!G.containsKey(x) || !G.containsKey(y) || !G.get(x).contains(y)) {
+			return false;
+		}
+		G.get(x).remove(y);
+		G.get(y).remove(x);
 		return false;
 	}
 	
@@ -105,7 +128,18 @@ public class Graph<V> {
 	 */
 	public boolean hasPath(V x, V y) {
 		// TODO Aufgabe 4.1.2
-		return false;
+		if(!G.containsKey(x) || !G.containsKey(y)) {
+			return false;
+		}
+		if(G.get(x).size()==0 || G.get(y).size() == 0) {
+			return false;
+		}
+		if(G.get(x).contains(y)) {
+			return true;
+		}
+		if(G.get(x).stream().filter(v -> hasPath(v,y)).findAny().isPresent()) {
+			return true;
+		} else return false;
 	}
 	
 	

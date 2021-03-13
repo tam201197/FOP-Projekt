@@ -56,8 +56,25 @@ public class Gameboard {
 	 */
 	public void placeCard(int x, int y, PathCard card) {
 		// TODO Aufgabe 4.1.4
-		
+		if(!canCardBePlacedAt(x,y,card)) {
+			return;
+		}
 		// stehen lassen
+		Position p = new Position(x,y);
+		board.put(p, card);
+		Set<CardAnchor> cardAnchor = card.getGraph().vertices();
+		for(CardAnchor c1 : cardAnchor) {
+			Position pofneighboor = c1.getAdjacentPosition(p);
+			if(isPositionEmpty(pofneighboor.x(),pofneighboor.y()))
+				continue;
+			for(CardAnchor c2 : board.get(pofneighboor).getGraph().vertices()) {
+				if (c2.equals(c1.getOppositeAnchor())) {
+					BoardAnchor b1 = BoardAnchor.of(p, c1);
+					BoardAnchor b2 = BoardAnchor.of(pofneighboor, c2);
+					graph.addEdge(b1, b2);
+				}
+			}
+		}
 		// check for goal cards
 		checkGoalCards();
 	}
@@ -92,7 +109,12 @@ public class Gameboard {
 	 */
 	public PathCard removeCard(int x, int y) {
 		// TODO Aufgabe 4.1.5
-		return null;
+		Position p = new Position(x,y);
+		for(CardAnchor c : CardAnchor.values()) {
+			BoardAnchor b = BoardAnchor.of(x, y, c);
+			graph.removeVertex(b);
+		}
+		return board.remove(p);
 	}
 	
 	
@@ -117,6 +139,10 @@ public class Gameboard {
 	 */
 	private boolean isPositionEmpty(int x, int y) {
 		// TODO Aufgabe 4.1.6
+		Position p = new Position(x,y);
+		if(board.containsKey(p)) {
+			return false;
+		}
 		return true;
 	}
 	
