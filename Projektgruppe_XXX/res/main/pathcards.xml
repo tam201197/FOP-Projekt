@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <cards>
-	<card name= "curve double down" count="1">
+	<card name= "curve_double_down" count="1">
 		<edge start="top" end="right"/>
 		<edge start="left" end="bottom"/>
 	</card>
-	<card name="curve up dead bottom" count="2">
+	<card name="curve_up_dead_bottom" count="2">
 		<edge start="left" end="top"/>
 		<node value="bottom"/>
 	</card>
-	<card name="line vert dead two" count="1">
+	<card name="line_vert_dead_two" count="1">
 		<edge start="top" end="bottom"/>
 		<node value="left"/>
 		<node value="right"/>

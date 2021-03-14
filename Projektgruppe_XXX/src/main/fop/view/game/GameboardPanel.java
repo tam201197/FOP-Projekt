@@ -8,6 +8,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,7 +23,7 @@ import javax.swing.JPanel;
 /**
  * 
  * Stellt das Wegelabyrinth dar.
- * Hi tam
+ * 
  *
  */
 @SuppressWarnings("serial")
@@ -189,21 +190,36 @@ public class GameboardPanel extends JPanel implements MouseListener, MouseMotion
 				if (GameController.getSelectedCard().isPathCard() && !hasBrokenTool) {
 					PathCard selectedCard = (PathCard) GameController.getSelectedCard();
 					if (GameController.canCardBePlacedAt(mouseX, mouseY, selectedCard))
-						GameController.placeSelectedCardAt(mouseX, mouseY);
+						try {
+							GameController.placeSelectedCardAt(mouseX, mouseY);
+						} catch (FileNotFoundException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 				}
 				
 				// destroy with rockfall
 				else if (GameController.getSelectedCard().isRockfall()) {
 					PathCard card = GameController.getCardAt(Position.of(mouseX, mouseY));
 					if (card != null && !card.isStartCard() && !card.isGoalCard())
-						GameController.destroyCardWithSelectedCardAt(mouseX, mouseY);
+						try {
+							GameController.destroyCardWithSelectedCardAt(mouseX, mouseY);
+						} catch (FileNotFoundException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 				}
 				
 				// look at goal card with map
 				else if (GameController.getSelectedCard().isMap()) {
 					PathCard card = GameController.getCardAt(Position.of(mouseX, mouseY));
 					if (card != null && card.isGoalCard())
-						GameController.lookAtGoalCardWithSelectedCard((GoalCard) card);
+						try {
+							GameController.lookAtGoalCardWithSelectedCard((GoalCard) card);
+						} catch (FileNotFoundException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 				}
 				
 				break;

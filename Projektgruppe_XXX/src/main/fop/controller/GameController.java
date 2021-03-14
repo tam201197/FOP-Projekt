@@ -2,6 +2,7 @@ package fop.controller;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -252,8 +253,9 @@ public final class GameController {
 	/**
 	 * Beendet den Zug des aktuellen aktiven Spielers und startet den Zug des nächsten Spielers.<br>
 	 * Dabei zieht der alte aktive Spieler eine Karte nach.
+	 * @throws FileNotFoundException 
 	 */
-	private static void nextPlayer() {
+	private static void nextPlayer() throws FileNotFoundException {
 		// Spielende prüfen
 		List<Player> winners = getWinners();
 		if (winners != null) {
@@ -345,8 +347,9 @@ public final class GameController {
 	/**
 	 * Beendet den Zug des aktiven Spielers.<br>
 	 * Danach ist der nächste Spieler an der Reihe.
+	 * @throws FileNotFoundException 
 	 */
-	public static void doNothing() {
+	public static void doNothing() throws FileNotFoundException {
 		nextPlayer();
 	}
 	
@@ -355,9 +358,10 @@ public final class GameController {
 	 * Danach ist der nächste Spieler an der Reihe.
 	 * @param x x-Position im Wegelabyrinth
 	 * @param y y-Position im Wegelabyrinth
+	 * @throws FileNotFoundException 
 	 * @see Gameboard#placeCard(int, int, PathCard)
 	 */
-	public static void placeSelectedCardAt(int x, int y) {
+	public static void placeSelectedCardAt(int x, int y) throws FileNotFoundException {
 		gameboard.placeCard(x, y, (PathCard) selectedCard);
 		playSelectedCard();
 		scorePoints(gameboard.getNumberOfAdjacentCards(x, y) + 1);
@@ -370,9 +374,10 @@ public final class GameController {
 	 * Danach ist der nächste Spieler an der Reihe.
 	 * @param x x-Position im Wegelabyrinth
 	 * @param y y-Position im Wegelabyrinth
+	 * @throws FileNotFoundException 
 	 * @see Gameboard#removeCard(int, int)
 	 */
-	public static void destroyCardWithSelectedCardAt(int x, int y) {
+	public static void destroyCardWithSelectedCardAt(int x, int y) throws FileNotFoundException {
 		PathCard oldCard = gameboard.removeCard(x, y);
 		discardPile.add(oldCard);
 		discardPile.add(selectedCard);
@@ -387,9 +392,10 @@ public final class GameController {
 	 * Danach ist der nächste Spieler an der Reihe.
 	 * @param player der Spieler, dessen Werkzeug repariert wird
 	 * @param brokenToolCard die Karte, die repariert wird
+	 * @throws FileNotFoundException 
 	 * @see Player#fixBrokenTool(BrokenToolCard, FixedToolCard)
 	 */
-	public static void fixBrokenToolCardWithSelectedCard(Player player, BrokenToolCard brokenToolCard) {
+	public static void fixBrokenToolCardWithSelectedCard(Player player, BrokenToolCard brokenToolCard) throws FileNotFoundException {
 		player.fixBrokenTool(brokenToolCard, (FixedToolCard) selectedCard);
 		discardPile.add(brokenToolCard);
 		discardPile.add(selectedCard);
@@ -402,8 +408,9 @@ public final class GameController {
 	 * Zerstört das Werkzeug eines Spielers mit der ausgewählten Karte.<br>
 	 * Danach ist der nächste Spieler an der Reihe.
 	 * @param player der Spieler, dessen Werkzeug zerstört wird
+	 * @throws FileNotFoundException 
 	 */
-	public static void breakToolWithSelectedCard(Player player) {
+	public static void breakToolWithSelectedCard(Player player) throws FileNotFoundException {
 		player.breakTool((BrokenToolCard) selectedCard);
 		playSelectedCard();
 		scorePoints(2);
@@ -415,8 +422,9 @@ public final class GameController {
 	 * Legt die ausgewählte Karte auf den Ablagestapel.<br>
 	 * Danach ist der nächste Spieler an der Reihe.
 	 * @param goalCard die anzuschauende Zielkarte
+	 * @throws FileNotFoundException 
 	 */
-	public static void lookAtGoalCardWithSelectedCard(GoalCard goalCard) {
+	public static void lookAtGoalCardWithSelectedCard(GoalCard goalCard) throws FileNotFoundException {
 		firePropertyChange(LOOK_AT_GOAL_CARD, goalCard);
 		discardPile.add(selectedCard);
 		playSelectedCard();
@@ -426,8 +434,9 @@ public final class GameController {
 	/**
 	 * Legt die ausgewählte Karte auf den Ablagestapel.<br>
 	 * Danach ist der nächste Spieler an der Reihe.
+	 * @throws FileNotFoundException 
 	 */
-	public static void discardSelectedCard() {
+	public static void discardSelectedCard() throws FileNotFoundException {
 		discardPile.add(selectedCard);
 		playSelectedCard();
 		nextPlayer();

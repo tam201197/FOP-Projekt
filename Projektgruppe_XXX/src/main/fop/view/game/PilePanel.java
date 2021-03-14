@@ -9,6 +9,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -198,7 +199,12 @@ public class PilePanel extends JPanel implements MouseListener, MouseMotionListe
 			// left click
 			case MouseEvent.BUTTON1:
 				if (GameController.getSelectedCard() != null && mouseHoveringDiscardPile)
-					GameController.discardSelectedCard();
+					try {
+						GameController.discardSelectedCard();
+					} catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				break;
 			default:
 				break;

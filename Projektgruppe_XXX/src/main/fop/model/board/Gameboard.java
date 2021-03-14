@@ -56,20 +56,22 @@ public class Gameboard {
 	 */
 	public void placeCard(int x, int y, PathCard card) {
 		// TODO Aufgabe 4.1.4
+		Position p = new Position(x,y);
 		if(!canCardBePlacedAt(x,y,card)) {
 			return;
 		}
 		// stehen lassen
-		Position p = new Position(x,y);
 		board.put(p, card);
 		Set<CardAnchor> cardAnchor = card.getGraph().vertices();
 		for(CardAnchor c1 : cardAnchor) {
 			Position pofneighboor = c1.getAdjacentPosition(p);
-			if(isPositionEmpty(pofneighboor.x(),pofneighboor.y()))
+			BoardAnchor b1 = BoardAnchor.of(p, c1);
+			if(isPositionEmpty(pofneighboor.x(),pofneighboor.y())) {
+				graph.addVertex(b1);
 				continue;
+			}
 			for(CardAnchor c2 : board.get(pofneighboor).getGraph().vertices()) {
 				if (c2.equals(c1.getOppositeAnchor())) {
-					BoardAnchor b1 = BoardAnchor.of(p, c1);
 					BoardAnchor b2 = BoardAnchor.of(pofneighboor, c2);
 					graph.addEdge(b1, b2);
 					break;
@@ -168,6 +170,9 @@ public class Gameboard {
 				}
 			}
 		}
+		if(board.keySet().size()>4) {
+			return false;
+		}
 		// die folgende Zeile entfernen und durch den korrekten Wert ersetzen
 		return board.computeIfAbsent(CardAnchor.left.getAdjacentPosition(Position.of(x + 1, y)), p -> null) == null;
 	}
@@ -181,6 +186,9 @@ public class Gameboard {
 	 */
 	private boolean doesCardMatchItsNeighbors(int x, int y, PathCard card) {
 		// TODO Aufgabe 4.1.8
+		if(card.isGoalCard()|| card.isStartCard()){
+			return true;
+		}
 		for(CardAnchor c1 : card.getGraph().vertices()) {
 			Position pneighboor = c1.getAdjacentPosition(new Position(x,y));
 			if(isPositionEmpty(pneighboor.x(),pneighboor.y()))

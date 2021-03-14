@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -238,12 +239,22 @@ public class PlayerPanel extends JPanel implements MouseListener, MouseMotionLis
 				// fix broken tool card
 				if (selectedCard != null && selectedCard.isFixedTool() && mouseToolTypeCard != null)
 					if (player.canBrokenToolBeFixed(mouseToolTypeCard, (FixedToolCard) selectedCard))
-						GameController.fixBrokenToolCardWithSelectedCard(player, mouseToolTypeCard);
+						try {
+							GameController.fixBrokenToolCardWithSelectedCard(player, mouseToolTypeCard);
+						} catch (FileNotFoundException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 				
 				// break tool
 				if (selectedCard != null && selectedCard.isBrokenTool() && mouseHoveringName)
 					if (player != GameController.getActivePlayer() && player.canToolBeBroken((BrokenToolCard) selectedCard))
-						GameController.breakToolWithSelectedCard(player);
+						try {
+							GameController.breakToolWithSelectedCard(player);
+						} catch (FileNotFoundException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 				
 				break;
 			

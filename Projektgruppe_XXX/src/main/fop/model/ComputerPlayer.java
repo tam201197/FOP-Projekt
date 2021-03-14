@@ -1,5 +1,6 @@
 package fop.model;
 
+import java.io.FileNotFoundException;
 import java.util.concurrent.TimeUnit;
 
 import fop.controller.GameController;
@@ -57,8 +58,9 @@ public class ComputerPlayer extends Player {
 	 * Führt einen Zug des Computerspielers aus.<br>
 	 * Benutzt {@link #selectCard(Card)}, um eine Karte auszuwählen.<br>
 	 * Benutzt Methoden in {@link GameController}, um Aktionen auszuführen.
+	 * @throws FileNotFoundException 
 	 */
-	protected void doAction() {
+	protected void doAction() throws FileNotFoundException {
 		// TODO Aufgabe 4.3.3
 		// Sie dürfen diese Methode vollständig umschreiben und den vorhandenen Code entfernen.
 		
