@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <cards>
+	<card name= "curve double down" count="1">
+		<edge start="top" end="right"/>
+		<edge start="left" end="bottom"/>
+	</card>
+	<card name="curve up dead bottom" count="2">
+		<edge start="left" end="top"/>
+		<node value="bottom"/>
+	</card>
+	<card name="line vert dead two" count="1">
+		<edge start="top" end="bottom"/>
+		<node value="left"/>
+		<node value="right"/>
+	</card>
+	<card name="tunnel" count="2">
+		<edge start="top" end="bottom"/>
+		<edge start="left" end="right"/>
+	</card>
 	<card name="plus" count="5">
 		<edge start="top" end="left"/>
 		<edge start="top" end="bottom"/>
@@ -68,4 +85,5 @@
 	<card name="dead_single_horiz">
 		<node value="left"/>
 	</card>
+
 </cards>
