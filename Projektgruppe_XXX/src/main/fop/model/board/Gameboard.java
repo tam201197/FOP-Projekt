@@ -57,12 +57,20 @@ public class Gameboard {
 	public void placeCard(int x, int y, PathCard card) {
 		// TODO Aufgabe 4.1.4
 		Position p = new Position(x,y);
+		Set<CardAnchor> cardAnchor = card.getGraph().vertices();
+		if(card.isGoalCard() || card.isStartCard()) {
+			board.put(p, card);
+			for(CardAnchor c1 : cardAnchor) {
+				BoardAnchor b1 = BoardAnchor.of(p, c1);
+				graph.addVertex(b1);
+				}
+			return;
+		}
 		if(!canCardBePlacedAt(x,y,card)) {
 			return;
 		}
 		// stehen lassen
 		board.put(p, card);
-		Set<CardAnchor> cardAnchor = card.getGraph().vertices();
 		for(CardAnchor c1 : cardAnchor) {
 			Position pofneighboor = c1.getAdjacentPosition(p);
 			BoardAnchor b1 = BoardAnchor.of(p, c1);
@@ -105,6 +113,7 @@ public class Gameboard {
 	}
 	
 	/**
+	 * 
 	 * Entfernt die Wegekarte an der übergebenen Position.
 	 * @param x x-Position im Wegelabyrinth
 	 * @param y y-Position im Wegelabyrinth
@@ -157,7 +166,7 @@ public class Gameboard {
 	 */
 	private boolean existsPathFromStartCard(int x, int y) {
 		// TODO Aufgabe 4.1.7
-		for (Entry<Position, PathCard> start : board.entrySet().stream().filter(e -> e.getValue().isStartCard()).collect(Collectors.toList())) {
+		for (Entry<Position, PathCard> start : board.entrySet().stream().collect(Collectors.toList())) {
 			for(CardAnchor cend : CardAnchor.values()) {
 				Position pofneighboor = cend.getAdjacentPosition(new Position(x,y));
 				if(isPositionEmpty(pofneighboor.x(),pofneighboor.y()))
@@ -170,11 +179,9 @@ public class Gameboard {
 				}
 			}
 		}
-		if(board.keySet().size()>4) {
-			return false;
-		}
+		return false;
 		// die folgende Zeile entfernen und durch den korrekten Wert ersetzen
-		return board.computeIfAbsent(CardAnchor.left.getAdjacentPosition(Position.of(x + 1, y)), p -> null) == null;
+//		return board.computeIfAbsent(CardAnchor.left.getAdjacentPosition(Position.of(x + 1, y)), p -> null) == null;
 	}
 	
 	/**
@@ -186,13 +193,12 @@ public class Gameboard {
 	 */
 	private boolean doesCardMatchItsNeighbors(int x, int y, PathCard card) {
 		// TODO Aufgabe 4.1.8
-		if(card.isGoalCard()|| card.isStartCard()){
-			return true;
-		}
-		for(CardAnchor c1 : card.getGraph().vertices()) {
+		for(CardAnchor c1 : CardAnchor.values()) {
 			Position pneighboor = c1.getAdjacentPosition(new Position(x,y));
 			if(isPositionEmpty(pneighboor.x(),pneighboor.y()))
 				continue;
+			if(!card.getGraph().hasVertex(c1))
+				return false;
 			Boolean check = false;
 			for(CardAnchor c2 : board.get(pneighboor).getGraph().vertices()) {
 				if(c2.equals(c1.getOppositeAnchor())) {
