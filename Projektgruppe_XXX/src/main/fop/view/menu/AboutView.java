@@ -42,10 +42,14 @@ public class AboutView extends MenuView {
 		GridBagConstraints aboutTextConstraints = new GridBagConstraints();
 		aboutTextConstraints.weightx = 1.0;
 		aboutTextConstraints.weighty = 1.0;
-		aboutTextConstraints.fill = GridBagConstraints.BOTH;
+		//aboutTextConstraints.fill = GridBagConstraints.BOTH;
 		aboutTextConstraints.insets = new Insets(0, 2, 2, 2);
 		aboutTextConstraints.gridx = 0;
 		aboutTextConstraints.gridy = 0;
+		
+		
+		
+		
 		ep = new JEditorPane();
 		ep.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
 		ep.setBackground(contentPanel.getBackground().brighter());
