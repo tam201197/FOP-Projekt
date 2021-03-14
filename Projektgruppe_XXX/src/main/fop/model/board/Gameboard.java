@@ -63,7 +63,11 @@ public class Gameboard {
 			for(CardAnchor c1 : cardAnchor) {
 				BoardAnchor b1 = BoardAnchor.of(p, c1);
 				graph.addVertex(b1);
+				for(CardAnchor c2 : card.getGraph().getAdjacentVertices(c1)) {
+					BoardAnchor b2 = BoardAnchor.of(p, c2);
+					graph.addEdge(b1, b2);
 				}
+			}
 			return;
 		}
 		if(!canCardBePlacedAt(x,y,card)) {
@@ -76,12 +80,16 @@ public class Gameboard {
 			BoardAnchor b1 = BoardAnchor.of(p, c1);
 			if(isPositionEmpty(pofneighboor.x(),pofneighboor.y())) {
 				graph.addVertex(b1);
+				for(CardAnchor c2 : card.getGraph().getAdjacentVertices(c1)) {
+					BoardAnchor b2 = BoardAnchor.of(p, c2);
+					graph.addEdge(b1, b2);
+				}
 				continue;
 			}
-			for(CardAnchor c2 : board.get(pofneighboor).getGraph().vertices()) {
-				if (c2.equals(c1.getOppositeAnchor())) {
-					BoardAnchor b2 = BoardAnchor.of(pofneighboor, c2);
-					graph.addEdge(b1, b2);
+			for(CardAnchor c3 : board.get(pofneighboor).getGraph().vertices()) {
+				if (c3.equals(c1.getOppositeAnchor())) {
+					BoardAnchor b3 = BoardAnchor.of(pofneighboor, c3);
+					graph.addEdge(b1, b3);
 					break;
 				}
 			}
@@ -166,7 +174,7 @@ public class Gameboard {
 	 */
 	private boolean existsPathFromStartCard(int x, int y) {
 		// TODO Aufgabe 4.1.7
-		for (Entry<Position, PathCard> start : board.entrySet().stream().collect(Collectors.toList())) {
+		for (Entry<Position, PathCard> start : board.entrySet().stream().filter(e -> e.getValue().isStartCard()).collect(Collectors.toList())) {
 			for(CardAnchor cend : CardAnchor.values()) {
 				Position pofneighboor = cend.getAdjacentPosition(new Position(x,y));
 				if(isPositionEmpty(pofneighboor.x(),pofneighboor.y()))
