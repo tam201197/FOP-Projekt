@@ -35,6 +35,7 @@ public class Graph<V> {
 	 */
 	public void addVertex(V v) {
 		// TODO Aufgabe 4.1.1
+		this.G.put(V, null);
 	}
 	
 	/**
