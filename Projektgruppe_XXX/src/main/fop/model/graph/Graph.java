@@ -128,22 +128,44 @@ public class Graph<V> {
 	 */
 	public boolean hasPath(V x, V y) {
 		// TODO Aufgabe 4.1.2
-		if(x.equals(y)) {
+		if (x.equals(y)) {
 			return true;
 		}
-		if(!G.containsKey(x) || !G.containsKey(y)) {
-			return false;
-		}
-		if(G.get(x).size()==0 || G.get(y).size() == 0) {
-			return false;
-		}
-		if(G.get(x).contains(y)) {
+		
+		List <List<V>> allPaths = getAllPaths(x,y);
+		if (allPaths.size() >= 1) {
 			return true;
 		}
-		if(G.get(x).stream().filter(v -> hasPath(v,y)).findAny().isPresent()) {
-			return true;
-		} else return false;
+		
+		return false;
 	}
+	  public List<List<V>> getAllPaths(V x, V y) {
+	       
+	        List<List<V>> paths = new ArrayList<List<V>>();
+	        recursiveFind(x, y, paths, new HashSet<V>());
+	        return paths;
+	    }
+
+	    // so far this dude ignore's cycles.
+	    private void recursiveFind (V x, V y, List<List<V>> paths, HashSet<V> path) {
+	        path.add(x);
+
+	        if (x.equals(y)) {
+	            paths.add(new ArrayList<V>(path));
+	            path.remove(x);
+	            return;
+	        }
+
+	        Set<V> edges  = G.get(x);
+
+	        for (V t : edges) {
+	            if (!path.contains(t)) {
+	                recursiveFind (t, y, paths, path);
+	            }
+	        }
+
+	        path.remove(x);
+	    }
 	
 	
 	// Collections //
