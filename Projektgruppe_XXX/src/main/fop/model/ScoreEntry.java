@@ -4,17 +4,17 @@ import java.io.PrintWriter;
 import java.time.LocalDateTime;
 
 /**
- * 
+ *
  * Speichert einen Highscore-Eintrag, der aus dem Namen des Spielers,
  * einem Zeitstempel und der erzielten Punktzahl besteht.
  *
  */
 public class ScoreEntry implements Comparable<ScoreEntry> {
-	
+
 	protected String name;
 	protected LocalDateTime dateTime;
 	protected int score;
-	
+
 	/**
 	 * Erstellt eine neue ScoreEntry.
 	 * @param name der Name des Spielers
@@ -26,9 +26,9 @@ public class ScoreEntry implements Comparable<ScoreEntry> {
 		this.dateTime = dateTime;
 		this.score = score;
 	}
-	
+
 	// load and save //
-	
+
 	/**
 	 * Wandelt eine Zeile in ein ScoreEntry Objekt.<br>
 	 * Gibt {@code null} zurück, wenn die Zeile nicht in ein
@@ -39,9 +39,17 @@ public class ScoreEntry implements Comparable<ScoreEntry> {
 	 */
 	public static ScoreEntry read(String line) {
 		// TODO Aufgabe 4.2.1
+		String [] array = line.split(";");
+		if (array.length == 3) {
+			if (array[1].matches("/^(\\d{4,})-(\\d{2})-(\\d{2})[T ](\\d{2}):(\\d{2})(?::(\\d{2}(?:\\.\\d+)?))?$/")
+					&& array[2].matches("-?(0|[1-9]\\d*)")) {
+				return new ScoreEntry (array [0], LocalDateTime.parse(array [1]), Integer.parseInt(array[2]));
+			}
+		}
+
 		return null;
 	}
-	
+
 	/**
 	 * Schreibt das ScoreEntry Objekt mit dem übergebenen {@link PrintWriter}.<br>
 	 * Format: {@code name;dateTime;score}
@@ -49,36 +57,39 @@ public class ScoreEntry implements Comparable<ScoreEntry> {
 	 */
 	public void write(PrintWriter printWriter) {
 		// TODO Aufgabe 4.2.1
+		printWriter.append(this.name+";");
+		printWriter.append(this.dateTime.toString()+";");
+		printWriter.append(Integer.toString(this.score)+"\n");
 	}
-	
+
 	// get //
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public LocalDateTime getDateTime() {
 		return dateTime;
 	}
-	
+
 	public int getScore() {
 		return score;
 	}
-	
+
 	// Comparable //
-	
+
 	@Override
 	public int compareTo(ScoreEntry other) {
 		return Integer.compare(score, other.score);
 	}
-	
+
 	// Object //
-	
+
 	@Override
 	public String toString() {
 		return "ScoreEntry [name=" + name + ", dateTime=" + dateTime + ", score=" + score + "]";
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -88,7 +99,7 @@ public class ScoreEntry implements Comparable<ScoreEntry> {
 		result = prime * result + score;
 		return result;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
@@ -104,5 +115,5 @@ public class ScoreEntry implements Comparable<ScoreEntry> {
 		if (score != other.score) return false;
 		return true;
 	}
-	
+
 }
