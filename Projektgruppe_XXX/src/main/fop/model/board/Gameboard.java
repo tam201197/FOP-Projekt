@@ -58,20 +58,9 @@ public class Gameboard {
 		// TODO Aufgabe 4.1.4
 		Position p = new Position(x,y);
 		Set<CardAnchor> cardAnchor = card.getGraph().vertices();
-		if(card.isGoalCard() || card.isStartCard()) {
-			board.put(p, card);
-			for(CardAnchor c1 : cardAnchor) {
-				BoardAnchor b1 = BoardAnchor.of(p, c1);
-				graph.addVertex(b1);
-				for(CardAnchor c2 : card.getGraph().getAdjacentVertices(c1)) {
-					BoardAnchor b2 = BoardAnchor.of(p, c2);
-					graph.addEdge(b1, b2);
-				}
-			}
-			return;
-		}
-		if(!canCardBePlacedAt(x,y,card)) {
-			return;
+		if(!card.isGoalCard() && !card.isStartCard())
+			if(!canCardBePlacedAt(x,y,card)) {
+				return;
 		}
 		// stehen lassen
 		board.put(p, card);
@@ -205,7 +194,8 @@ public class Gameboard {
 			Position pneighboor = c1.getAdjacentPosition(new Position(x,y));
 			if(isPositionEmpty(pneighboor.x(),pneighboor.y()))
 				continue;
-			if((!card.getGraph().hasVertex(c1) && graph.hasVertex(BoardAnchor.of(pneighboor, c1.getOppositeAnchor())) || 
+			if(!board.get(pneighboor).isGoalCard() && 
+					(!card.getGraph().hasVertex(c1) && graph.hasVertex(BoardAnchor.of(pneighboor, c1.getOppositeAnchor())) || 
 					(card.getGraph().hasVertex(c1) && !graph.hasVertex(BoardAnchor.of(pneighboor, c1.getOppositeAnchor())))))
 				return false;
 		}
