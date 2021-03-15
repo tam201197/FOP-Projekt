@@ -205,18 +205,9 @@ public class Gameboard {
 			Position pneighboor = c1.getAdjacentPosition(new Position(x,y));
 			if(isPositionEmpty(pneighboor.x(),pneighboor.y()))
 				continue;
-			if(!card.getGraph().hasVertex(c1))
+			if((!card.getGraph().hasVertex(c1) && graph.hasVertex(BoardAnchor.of(pneighboor, c1.getOppositeAnchor())) || 
+					(card.getGraph().hasVertex(c1) && !graph.hasVertex(BoardAnchor.of(pneighboor, c1.getOppositeAnchor())))))
 				return false;
-			Boolean check = false;
-			for(CardAnchor c2 : board.get(pneighboor).getGraph().vertices()) {
-				if(c2.equals(c1.getOppositeAnchor())) {
-					check = true;
-					break;
-				}
-			}
-			if(!check) {
-				return false;
-			}
 		}
 		return true;
 	}
