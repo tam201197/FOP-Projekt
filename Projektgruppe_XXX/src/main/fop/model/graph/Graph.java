@@ -128,9 +128,9 @@ public class Graph<V> {
 	 */
 	public boolean hasPath(V x, V y) {
 		// TODO Aufgabe 4.1.2
-		if (x.equals(y)) {
+		/*if (x.equals(y)) {
 			return true;
-		}
+		}*/
 		
 		List <List<V>> allPaths = getAllPaths(x,y);
 		if (allPaths.size() >= 1) {

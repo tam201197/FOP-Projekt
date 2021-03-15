@@ -45,6 +45,7 @@ public class ScoreEntry implements Comparable<ScoreEntry> {
 					&& array[2].matches("-?(0|[1-9]\\d*)")) {
 				return new ScoreEntry (array [0], LocalDateTime.parse(array [1]), Integer.parseInt(array[2]));
 			}
+			return null;
 		}
 
 		return null;
@@ -57,9 +58,8 @@ public class ScoreEntry implements Comparable<ScoreEntry> {
 	 */
 	public void write(PrintWriter printWriter) {
 		// TODO Aufgabe 4.2.1
-		printWriter.append(this.name+";");
-		printWriter.append(this.dateTime.toString()+";");
-		printWriter.append(Integer.toString(this.score)+"\n");
+		printWriter.println(this.name+";"+this.dateTime.toString()+";"+Integer.toString(this.score));
+		
 	}
 
 	// get //

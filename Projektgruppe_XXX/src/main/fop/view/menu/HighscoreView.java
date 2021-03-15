@@ -43,6 +43,8 @@ public class HighscoreView extends MenuView{
 		String[] headers = new String[] {
 	            "Datum und Uhrzeit", "Name", "Punkte"
 	     };
+		
+		
 		ScoreEntry[] a = ScoreEntryIO.loadScoreEntries().toArray(new ScoreEntry[0]);
 		String [][] data = new String [a.length][3];
 		
