@@ -238,7 +238,7 @@ public final class GameController {
 		// Sie dürfen diese Methode vollständig umschreiben und den vorhandenen Code entfernen.
 		
 		// Goldkarte wurde aufgedeckt -> Goldsucher gewinnen
-		if (gameboard.isGoldCardVisible())
+		if (gameboard.isGoldCardVisible() && players.stream().filter(p -> p.getRole() == Player.Role.GOLD_MINER).findAny().isPresent())
 			return players.stream().filter(p -> p.getRole() == Player.Role.GOLD_MINER).collect(Collectors.toList());
 		
 		// keine Karten mehr übrig -> Saboteure gewinnen
@@ -246,7 +246,7 @@ public final class GameController {
 			return players.stream().filter(p -> p.getRole() == Player.Role.SABOTEUR).collect(Collectors.toList());
 		
 		//Stonekarte wurde afgedeckt -> Steinsucher gewinnen
-		if (gameboard.isStoneCardVisiable())
+		if (gameboard.isStoneCardVisiable() && players.stream().filter(p -> p.getRole() == Player.Role.STONE_MINER).findAny().isPresent())
 			return players.stream().filter(p -> p.getRole() == Player.Role.STONE_MINER).collect(Collectors.toList());
 		// noch kein Gewinner
 		return null;
