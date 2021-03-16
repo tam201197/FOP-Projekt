@@ -67,6 +67,7 @@ public class Gameboard {
 		for(CardAnchor c1 : cardAnchor) {
 			Position pofneighboor = c1.getAdjacentPosition(p);
 			BoardAnchor b1 = BoardAnchor.of(p, c1);
+			graph.addVertex(b1);
 			for(CardAnchor c2 : card.getGraph().getAdjacentVertices(c1)) {
 				BoardAnchor b2 = BoardAnchor.of(p, c2);
 				graph.addEdge(b1, b2);
