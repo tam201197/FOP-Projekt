@@ -9,7 +9,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.print.DocFlavor.READER;
@@ -67,7 +66,7 @@ public final class ScoreEntryIO {
 		// TODO Aufgabe 4.2.2
 		PrintWriter p;
 		try {
-			p = new PrintWriter(new FileOutputStream(new File(PATH)),true);
+			p = new PrintWriter(new FileOutputStream(PATH));
 			for(ScoreEntry s:scoreEntries) {
 				s.write(p);
 			}

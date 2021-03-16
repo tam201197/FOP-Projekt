@@ -62,22 +62,17 @@ public class Gameboard {
 			if(!canCardBePlacedAt(x,y,card)) {
 				return;
 		}
-		if(card.isGoalCard() && !isPositionEmpty(x,y)) {
-			removeCard(x,y);
-		}
 		// stehen lassen
 		board.put(p, card);
 		for(CardAnchor c1 : cardAnchor) {
 			Position pofneighboor = c1.getAdjacentPosition(p);
 			BoardAnchor b1 = BoardAnchor.of(p, c1);
-			if(isPositionEmpty(pofneighboor.x(),pofneighboor.y())) {
-				graph.addVertex(b1);
-				for(CardAnchor c2 : card.getGraph().getAdjacentVertices(c1)) {
-					BoardAnchor b2 = BoardAnchor.of(p, c2);
-					graph.addEdge(b1, b2);
-				}
-				continue;
+			for(CardAnchor c2 : card.getGraph().getAdjacentVertices(c1)) {
+				BoardAnchor b2 = BoardAnchor.of(p, c2);
+				graph.addEdge(b1, b2);
 			}
+			if(isPositionEmpty(pofneighboor.x(),pofneighboor.y()))
+				continue;
 			for(CardAnchor c3 : board.get(pofneighboor).getGraph().vertices()) {
 				if (c3.equals(c1.getOppositeAnchor())) {
 					BoardAnchor b3 = BoardAnchor.of(pofneighboor, c3);
@@ -195,11 +190,10 @@ public class Gameboard {
 		// TODO Aufgabe 4.1.8
 		for(CardAnchor c1 : CardAnchor.values()) {
 			Position pneighboor = c1.getAdjacentPosition(new Position(x,y));
-			if(isPositionEmpty(pneighboor.x(),pneighboor.y()))
+			if(isPositionEmpty(pneighboor.x(),pneighboor.y())|| board.get(pneighboor).isGoalCard())
 				continue;
-			if(!board.get(pneighboor).isGoalCard() && 
-					(!card.getGraph().hasVertex(c1) && graph.hasVertex(BoardAnchor.of(pneighboor, c1.getOppositeAnchor())) || 
-					(card.getGraph().hasVertex(c1) && !graph.hasVertex(BoardAnchor.of(pneighboor, c1.getOppositeAnchor())))))
+			if((!card.getGraph().hasVertex(c1) && graph.hasVertex(BoardAnchor.of(pneighboor, c1.getOppositeAnchor())) 
+					|| (card.getGraph().hasVertex(c1) && !graph.hasVertex(BoardAnchor.of(pneighboor, c1.getOppositeAnchor())))))
 				return false;
 		}
 		return true;

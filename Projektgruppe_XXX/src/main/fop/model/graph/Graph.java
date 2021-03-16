@@ -75,9 +75,10 @@ public class Graph<V> {
 		if(!G.containsKey(v)) {
 			return false;
 		}
-		Set<V> set = G.get(v);
-		set.forEach(x -> G.get(x).remove(v));
-		G.remove(v);
+		Set<V> set = G.remove(v);
+		for(V x: set) {
+			G.get(x).remove(v);
+		}
 		return true;
 	}
 	
@@ -95,7 +96,7 @@ public class Graph<V> {
 		}
 		G.get(x).remove(y);
 		G.get(y).remove(x);
-		return false;
+		return true;
 	}
 	
 	
@@ -127,45 +128,26 @@ public class Graph<V> {
 	 * @return {@code true} wenn ein Pfad existiert; sonst {@code false}
 	 */
 	public boolean hasPath(V x, V y) {
-		// TODO Aufgabe 4.1.2
-		/*if (x.equals(y)) {
-			return true;
-		}*/
-		
-		List <List<V>> allPaths = getAllPaths(x,y);
-		if (allPaths.size() >= 1) {
-			return true;
-		}
-		
-		return false;
+		// TODO Aufgabe 4.1.2a		
+		return recursiveFind(x,y,new HashSet<V>());
 	}
-	  public List<List<V>> getAllPaths(V x, V y) {
-	       
-	        List<List<V>> paths = new ArrayList<List<V>>();
-	        recursiveFind(x, y, paths, new HashSet<V>());
-	        return paths;
-	    }
+	  
 
-	    // so far this dude ignore's cycles.
-	    private void recursiveFind (V x, V y, List<List<V>> paths, HashSet<V> path) {
-	        path.add(x);
-
-	        if (x.equals(y)) {
-	            paths.add(new ArrayList<V>(path));
-	            path.remove(x);
-	            return;
-	        }
-
-	        Set<V> edges  = G.get(x);
-
-	        for (V t : edges) {
-	            if (!path.contains(t)) {
-	                recursiveFind (t, y, paths, path);
-	            }
-	        }
-
-	        path.remove(x);
-	    }
+	   // so far this dude ignore's cycles.
+	   private boolean recursiveFind (V x, V y, HashSet<V> path) {
+	       path.add(x);
+	       if (x.equals(y)) {
+	           return true;
+	       }
+	       Set<V> edges  = G.get(x);
+	       for (V t : edges) {
+	           if (!path.contains(t)) {
+	               if (recursiveFind (t, y, path))
+	            	   return true;
+	           }
+	       }
+	       return false;
+	   }
 
 	
 	
