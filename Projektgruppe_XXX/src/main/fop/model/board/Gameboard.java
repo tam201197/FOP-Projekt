@@ -120,8 +120,6 @@ public class Gameboard {
 		Position p = new Position(x,y);
 		for(CardAnchor c : CardAnchor.values()) {
 			BoardAnchor b = BoardAnchor.of(x, y, c);
-			Position pneighboor = c.getAdjacentPosition(p);
-			graph.removeEdge(b, BoardAnchor.of(pneighboor, c.getOppositeAnchor()));
 			graph.removeVertex(b);
 			
 		}

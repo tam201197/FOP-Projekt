@@ -242,9 +242,14 @@ public final class GameController {
 			return players.stream().filter(p -> p.getRole() == Player.Role.GOLD_MINER).collect(Collectors.toList());
 		
 		// keine Karten mehr übrig -> Saboteure gewinnen
-		if (drawDeck.isEmpty() && players.stream().allMatch(p -> p.getAllHandCards().isEmpty()))
-			return players.stream().filter(p -> p.getRole() == Player.Role.SABOTEUR).collect(Collectors.toList());
-		
+		if (drawDeck.isEmpty() && players.stream().allMatch(p -> p.getAllHandCards().isEmpty())) {
+			if(players.stream().filter(p -> p.getRole() == Player.Role.SABOTEUR).findAny().isPresent())
+				return players.stream().filter(p -> p.getRole() == Player.Role.SABOTEUR).collect(Collectors.toList());
+			else {
+				int highScore = players.stream().mapToInt(p -> p.getScore()).max().getAsInt();
+				return players.stream().filter(p -> p.getScore() == highScore).collect(Collectors.toList());
+			}
+		}
 		//Stonekarte wurde afgedeckt -> Steinsucher gewinnen
 		if (gameboard.isStoneCardVisiable() && players.stream().filter(p -> p.getRole() == Player.Role.STONE_MINER).findAny().isPresent())
 			return players.stream().filter(p -> p.getRole() == Player.Role.STONE_MINER).collect(Collectors.toList());

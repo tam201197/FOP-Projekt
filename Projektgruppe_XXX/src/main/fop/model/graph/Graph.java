@@ -35,6 +35,8 @@ public class Graph<V> {
 	 */
 	public void addVertex(V v) {
 		// TODO Aufgabe 4.1.1
+		if(G.containsKey(v))
+			return;
 		G.put(v, new HashSet<V>());
 	}
 	
