@@ -46,7 +46,7 @@ public class HighscoreView extends MenuView{
 		String [][] data = new String [a.length][3];
 		
 		for(int x = 0;x<a.length;x++) {
-			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd' 'HH:mm:ss");
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy' 'HH:mm:ss");
 			data[x][0] = a[x].getDateTime().format(dtf).toString();
 			data[x][1] = a[x].getName();
 			data[x][2] = String.valueOf(a[x].getScore());
