@@ -207,6 +207,9 @@ public class Gameboard {
 		return board.values().stream().anyMatch(c -> c.isGoalCard() && ((GoalCard) c).getType() == GoalCard.Type.Gold && !((GoalCard) c).isCovered());
 	}
 	
+	public boolean isStoneCardVisiable() {
+		return board.values().stream().anyMatch(c->c.isGoalCard() && ((GoalCard) c).getType() == GoalCard.Type.Stone && !((GoalCard) c).isCovered());
+	}
 	
 	// get //
 	

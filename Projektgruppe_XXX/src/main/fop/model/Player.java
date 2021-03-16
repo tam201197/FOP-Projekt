@@ -189,7 +189,7 @@ public class Player {
 	 * Alle möglichen Rollen für Spieler.
 	 */
 	public enum Role {
-		GOLD_MINER, SABOTEUR;
+		GOLD_MINER, SABOTEUR, STONE_MINER;
 	}
 	
 }

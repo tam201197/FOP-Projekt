@@ -53,14 +53,9 @@ public class HighscoreView extends MenuView{
 		}
 		JTable scoreTable = new JTable(data, headers);
 		JScrollPane scrollPane = new JScrollPane(scoreTable);
-		
-		
 		JTableHeader theader = scoreTable.getTableHeader();
 		theader.setBackground(this.getBackground());
 		((DefaultTableCellRenderer)theader.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);			
-		
-		
-				scoreTable.setAutoCreateRowSorter(true);
 		contentPanel.add(scrollPane, aboutScoresTable);
 		
 

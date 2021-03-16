@@ -245,6 +245,9 @@ public final class GameController {
 		if (drawDeck.isEmpty() && players.stream().allMatch(p -> p.getAllHandCards().isEmpty()))
 			return players.stream().filter(p -> p.getRole() == Player.Role.SABOTEUR).collect(Collectors.toList());
 		
+		//Stonekarte wurde afgedeckt -> Steinsucher gewinnen
+		if (gameboard.isStoneCardVisiable())
+			return players.stream().filter(p -> p.getRole() == Player.Role.STONE_MINER).collect(Collectors.toList());
 		// noch kein Gewinner
 		return null;
 	}
@@ -257,10 +260,22 @@ public final class GameController {
 	private static void nextPlayer() {
 		// Spielende prüfen
 		List<Player> winners = getWinners();
+	
 		if (winners != null) {
 			// Siegpunkte verteilen
 			for (Player player : winners)
-				player.scorePoints(20);
+				for (Card handCard : player.getAllHandCards()) {
+					if(handCard.isBrokenTool()) 
+						player.scorePoints(5);	
+					if (handCard.isFixedTool())
+						player.scorePoints(10);
+					if (handCard.isPathCard())
+						player.scorePoints(1);
+					if (handCard.isRockfall())
+						player.scorePoints(3);
+				}
+			
+			//player.scorePoints(30);
 			// Highscores speichern
 			LocalDateTime now = LocalDateTime.now();
 			for (Player player : players) {
