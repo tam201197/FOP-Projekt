@@ -199,12 +199,7 @@ public class PilePanel extends JPanel implements MouseListener, MouseMotionListe
 			// left click
 			case MouseEvent.BUTTON1:
 				if (GameController.getSelectedCard() != null && mouseHoveringDiscardPile)
-					try {
-						GameController.discardSelectedCard();
-					} catch (FileNotFoundException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+					GameController.discardSelectedCard();
 				break;
 			default:
 				break;

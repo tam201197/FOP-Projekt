@@ -2,6 +2,7 @@ package fop.model;
 
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 /**
  *
@@ -39,15 +40,16 @@ public class ScoreEntry implements Comparable<ScoreEntry> {
 	 */
 	public static ScoreEntry read(String line) {
 		// TODO Aufgabe 4.2.1
-		String [] array = line.split(";");
-		if (array.length == 3) {
-			if (array[1].matches("/^(\\d{4,})-(\\d{2})-(\\d{2})[T ](\\d{2}):(\\d{2})(?::(\\d{2}(?:\\.\\d+)?))?$/")
-					&& array[2].matches("-?(0|[1-9]\\d*)")) {
-				return new ScoreEntry (array [0], LocalDateTime.parse(array [1]), Integer.parseInt(array[2]));
-			}
+		String[] array = line.split(";");
+		if (array.length != 3)
 			return null;
+		try{
+			LocalDateTime date = LocalDateTime.parse(array[1]);
+			Integer num = Integer.parseInt(array[2]);
+			return new ScoreEntry (array[0], date, num);
+		} catch (DateTimeParseException exp) {
+		} catch (NumberFormatException exp) {
 		}
-
 		return null;
 	}
 
@@ -59,7 +61,6 @@ public class ScoreEntry implements Comparable<ScoreEntry> {
 	public void write(PrintWriter printWriter) {
 		// TODO Aufgabe 4.2.1
 		printWriter.println(this.name+";"+this.dateTime.toString()+";"+Integer.toString(this.score));
-		
 	}
 
 	// get //

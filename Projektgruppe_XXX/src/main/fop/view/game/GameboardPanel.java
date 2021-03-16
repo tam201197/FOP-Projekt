@@ -190,36 +190,22 @@ public class GameboardPanel extends JPanel implements MouseListener, MouseMotion
 				if (GameController.getSelectedCard().isPathCard() && !hasBrokenTool) {
 					PathCard selectedCard = (PathCard) GameController.getSelectedCard();
 					if (GameController.canCardBePlacedAt(mouseX, mouseY, selectedCard))
-						try {
-							GameController.placeSelectedCardAt(mouseX, mouseY);
-						} catch (FileNotFoundException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
+						GameController.placeSelectedCardAt(mouseX, mouseY);
 				}
 				
 				// destroy with rockfall
 				else if (GameController.getSelectedCard().isRockfall()) {
 					PathCard card = GameController.getCardAt(Position.of(mouseX, mouseY));
 					if (card != null && !card.isStartCard() && !card.isGoalCard())
-						try {
-							GameController.destroyCardWithSelectedCardAt(mouseX, mouseY);
-						} catch (FileNotFoundException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
+						GameController.destroyCardWithSelectedCardAt(mouseX, mouseY);
+						
 				}
 				
 				// look at goal card with map
 				else if (GameController.getSelectedCard().isMap()) {
 					PathCard card = GameController.getCardAt(Position.of(mouseX, mouseY));
 					if (card != null && card.isGoalCard())
-						try {
-							GameController.lookAtGoalCardWithSelectedCard((GoalCard) card);
-						} catch (FileNotFoundException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
+						GameController.lookAtGoalCardWithSelectedCard((GoalCard) card);
 				}
 				
 				break;

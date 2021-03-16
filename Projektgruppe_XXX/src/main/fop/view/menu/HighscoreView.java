@@ -1,7 +1,5 @@
 package fop.view.menu;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -14,7 +12,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
 
 import fop.io.ScoreEntryIO;
 import fop.model.ScoreEntry;
@@ -49,7 +46,7 @@ public class HighscoreView extends MenuView{
 		String [][] data = new String [a.length][3];
 		
 		for(int x = 0;x<a.length;x++) {
-			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd' 'HH:mm:ss");
 			data[x][0] = a[x].getDateTime().format(dtf).toString();
 			data[x][1] = a[x].getName();
 			data[x][2] = String.valueOf(a[x].getScore());

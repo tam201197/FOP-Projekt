@@ -62,6 +62,9 @@ public class Gameboard {
 			if(!canCardBePlacedAt(x,y,card)) {
 				return;
 		}
+		if(card.isGoalCard() && !isPositionEmpty(x,y)) {
+			removeCard(x,y);
+		}
 		// stehen lassen
 		board.put(p, card);
 		for(CardAnchor c1 : cardAnchor) {

@@ -3,7 +3,6 @@ package fop.view.game;
 import static fop.io.CardImageReader.ASPECT_RATIO;
 
 import java.awt.*;
-import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -33,14 +32,7 @@ public final class DialogHandler {
 	public DialogHandler(Component parent) {
 		this.parent = parent;
 		GameController.addPropertyChangeListener(GameController.INFORM_NEXT_PLAYER, evt -> showNextPlayerDialog((Player) evt.getNewValue()));
-		GameController.addPropertyChangeListener(GameController.ACTIVE_PLAYER_NO_HAND_CARDS, evt -> {
-			try {
-				showActivePlayerNoHandCardsDialog();
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		});
+		GameController.addPropertyChangeListener(GameController.ACTIVE_PLAYER_NO_HAND_CARDS, evt -> showActivePlayerNoHandCardsDialog());
 		GameController.addPropertyChangeListener(GameController.DRAW_CARD, evt -> showDrawCardDialog((Card) evt.getNewValue()));
 		GameController.addPropertyChangeListener(GameController.LOOK_AT_GOAL_CARD, evt -> showGoalCardDialog((GoalCard) evt.getNewValue()));
 		GameController.addPropertyChangeListener(GameController.GAME_OVER, evt -> showGameOverDialog((List<Player>) evt.getNewValue()));
@@ -61,9 +53,8 @@ public final class DialogHandler {
 	
 	/**
 	 * Informiert den aktiven Spieler darüber, dass ihm keine Handkarten mehr zur Verfügung stehen.
-	 * @throws FileNotFoundException 
 	 */
-	private final void showActivePlayerNoHandCardsDialog() throws FileNotFoundException {
+	private final void showActivePlayerNoHandCardsDialog() {
 		if (!GameController.getActivePlayer().isComputer())
 			JOptionPane.showMessageDialog(parent, "<html>Du hast keine Handkarten mehr.<br>Dein Zug ist hiermit beendet.</html>",
 					"Keine Handkarten mehr", JOptionPane.INFORMATION_MESSAGE, null);
