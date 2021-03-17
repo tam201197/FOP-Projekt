@@ -1,10 +1,35 @@
 package fop.model;
 
+import static org.junit.jupiter.api.DynamicTest.stream;
+
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import fop.controller.GameController;
+import fop.model.board.Gameboard;
+import fop.model.board.Position;
+import fop.model.cards.ActionCard;
+import fop.model.cards.BrokenToolCard;
 import fop.model.cards.Card;
+import fop.model.cards.CardAnchor;
+import fop.model.cards.FixedToolCard;
+import fop.model.cards.GoalCard;
+import fop.model.cards.PathCard;
+import fop.model.cards.RockfallCard;
+import fop.model.cards.ToolType;
+import fop.model.cards.GoalCard.Type;
+import fop.model.graph.Graph;
+
+import javax.lang.model.util.ElementScanner6;
 import javax.swing.SwingWorker;
 
 /***
@@ -13,16 +38,20 @@ import javax.swing.SwingWorker;
  *
  */
 public class ComputerPlayer extends Player {
-	
+
+	private ArrayList<Position> goalCardPositions;
+	private boolean useMap;
+
 	public ComputerPlayer(String name) {
 		super(name);
 		GameController.addPropertyChangeListener(GameController.NEXT_PLAYER, evt -> {
 			// skip if it is not the players turn
-			if (GameController.getActivePlayer() != this) return;
-			
+			if (GameController.getActivePlayer() != this)
+				return;
+
 			// do action in background worker
 			new SwingWorker<Object, Void>() {
-				
+
 				@Override
 				protected Object doInBackground() throws Exception {
 					sleep(800);
@@ -32,46 +61,313 @@ public class ComputerPlayer extends Player {
 				}
 			}.execute();
 		});
+
+		goalCardPositions = new ArrayList<Position>();
+		goalCardPositions.add(Position.of(8, 0));
+		goalCardPositions.add(Position.of(8, -2));
+		goalCardPositions.add(Position.of(8, 2));
+		if (role == Role.SABOTEUR)
+			useMap = false;
+		else
+			useMap = true;
 	}
-	
+
 	@Override
 	public boolean isComputer() {
 		return true;
 	}
-	
+
 	/**
-	 * Pausiert das Programm, damit die Änderungen auf der Benutzeroberfläche sichtbar werden.
+	 * Pausiert das Programm, damit die Änderungen auf der Benutzeroberfläche
+	 * sichtbar werden.
+	 * 
 	 * @param timeMillis zu wartende Zeit in Millisekunden
 	 */
 	protected void sleep(int timeMillis) {
 		try {
 			TimeUnit.MILLISECONDS.sleep(timeMillis);
-		} catch (InterruptedException ignored) {}
+		} catch (InterruptedException ignored) {
+		}
 	}
-	
+
 	protected void selectCard(Card card) {
 		GameController.selectCard(card);
 		sleep(800);
 	}
-	
+
 	/**
 	 * Führt einen Zug des Computerspielers aus.<br>
 	 * Benutzt {@link #selectCard(Card)}, um eine Karte auszuwählen.<br>
 	 * Benutzt Methoden in {@link GameController}, um Aktionen auszuführen.
-	 * @throws FileNotFoundException 
+	 * 
+	 * @throws FileNotFoundException
 	 */
 	protected void doAction() throws FileNotFoundException {
 		// TODO Aufgabe 4.3.3
-		// Sie dürfen diese Methode vollständig umschreiben und den vorhandenen Code entfernen.
-		
+		// Sie dürfen diese Methode vollständig umschreiben und den vorhandenen Code
+		// entfernen.
+
+		if (useMap){
+		if (lookAtGoalCard())
+			return;
+		}
+
+		if (repairTool())
+			;
+		else if (breakRandomTool())
+			;
+		else if (placePathCard())
+			;
+		else
+			discardRandomCard();
+	}
+
+	// Beim Aufruf dieser Methode wird versucht möglichst gut in Richtung Zielkarte
+	// zu bauen
+	protected boolean placePathCard() throws FileNotFoundException {
+
+		ArrayList<Card> pathCards = handCards.stream().filter(c -> c.isPathCard())
+				.collect(Collectors.toCollection(ArrayList::new));
+
+		// Zur Sicherheit, wird später geändert
+		if (pathCards.isEmpty()) {
+			discardRandomCard();
+			return false;
+		}
+
+		var board = GameController.getGameboard().getBoard();
+
+		ArrayList<PathCardInfo> pCIList = new ArrayList<PathCardInfo>();
+
+		for (Card card : pathCards) {
+			PathCardInfo pCI = optimalPathCard((PathCard) card, board);
+			if (pCI.inPlay)
+				pCIList.add(pCI);
+		}
+
+		if (pCIList.isEmpty())
+			return false;
+
+		PathCardInfo optimalPathCard = pCIList.get(0);
+		for (PathCardInfo pCI : pCIList) {
+			if (pCI.distance < optimalPathCard.distance)
+				optimalPathCard = pCI;
+		}
+
+		selectCard(optimalPathCard.pathCard);
+		GameController.placeSelectedCardAt(optimalPathCard.position.x(), optimalPathCard.position.y());
+		return true;
+	}
+
+	/**
+	 * 
+	 * @param card
+	 * @param board
+	 * @return die Position mit der kleinsten Distanz zu einer der Zielkarten falls
+	 *         es mehrere gleiche kleinsten Distanzen gibt wird die erste gefundene
+	 *         kleinste Position zurückgegeben
+	 */
+	protected PathCardInfo optimalPathCard(PathCard card, Map<Position, PathCard> board) {
+		PathCardInfo pCI = new PathCardInfo(card, 0, null, false);
+
+		for (Position pos : board.keySet()) {
+			for (int y = -1; y <= 1; y++) {
+				for (int x = -1; x <= 1; x++) {
+
+					if (GameController.canCardBePlacedAt(x + pos.x(), y + pos.y(), card)) {
+
+						Graph<CardAnchor> graph = card.getGraph();
+						Set<CardAnchor> ancher = graph.vertices();
+						
+						double dst = 0;
+						if (role != Role.SABOTEUR)
+							 dst = Double.MAX_VALUE;
+						
+						// Für jeden Anker wird die Distanz für jede adjacent Position mit jeder
+						// Zielkarte berechnet und die kleinste genommen
+						for (CardAnchor cardAnchor : ancher) {
+
+							for (Position secPos : goalCardPositions) {
+
+								double newDst = distance(
+										cardAnchor.getAdjacentPosition(Position.of(pos.x() + x, pos.y() + y)), secPos);
+
+								if (role != Role.SABOTEUR) {
+									if (newDst < dst) {
+										pCI.distance = newDst;
+										pCI.position = Position.of(x + pos.x(), y + pos.y());
+										pCI.inPlay = true;
+										dst = newDst;
+									}
+								} else {
+									//Wenn Saboteur, so weit wie möglich wegbauen
+									if (newDst > dst) {
+										pCI.distance = newDst;
+										pCI.position = Position.of(x + pos.x(), y + pos.y());
+										pCI.inPlay = true;
+										dst = newDst;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return pCI;
+	}
+
+	protected double distance(Position pos, Position pos2) {
+		double x = pos.x() - pos2.x();
+		x *= x;
+		double y = pos.y() - pos2.y();
+		y *= y;
+
+		return Math.sqrt(x + y);
+	}
+
+	protected void discardRandomCard() throws FileNotFoundException {
+
 		// erhalte zufällige Handkarte
 		Card card = handCards.get((int) (Math.random() * handCards.size()));
-		
+
 		// wähle Karte aus
 		selectCard(card);
-		
+
 		// werfe Karte ab
+
 		GameController.discardSelectedCard();
 	}
-	
+
+	// macht ein zufälliges Werkzeug von einem zufälligem Spieler kapput, der nicht
+	// die selbe Rolle hat
+	protected boolean breakRandomTool() {
+		ArrayList<Card> lockCards = handCards.stream().filter(c -> c.isBrokenTool())
+				.collect(Collectors.toCollection(ArrayList::new));
+
+		if (lockCards.isEmpty())
+			return false;
+
+		// erhalte zufällige BreakKarte
+		Card card = lockCards.get((int) (Math.random() * lockCards.size()));
+
+		// erhalte Spieler, die nicht der Spieler am Zug sind
+		ArrayList<Player> players = Arrays.asList(GameController.getPlayers()).stream()
+				.filter(p -> p != this && p.canToolBeBroken((BrokenToolCard) card) && this.role != p.role)
+				.collect(Collectors.toCollection(ArrayList::new));
+
+		if (players.isEmpty())
+			return false;
+
+		// wähle zufälligen Spieler aus
+		Player randomPlayer = players.get((int) Math.random() * players.size());
+
+		// Zerbreche sein Tool
+		selectCard(card);
+		GameController.breakToolWithSelectedCard(randomPlayer);
+
+		return true;
+	}
+
+	// repariert ein Tool von sich oder Spielern selber Rolle, falls die Möglichkeit
+	// da ist
+	protected boolean repairTool() {
+		ArrayList<Player> sameRolePlayers = Arrays.asList(GameController.getPlayers()).stream()
+				.filter(p -> p.role == this.role && p.hasBrokenTool()).collect(Collectors.toCollection(ArrayList::new));
+
+		ArrayList<Card> fixCards = handCards.stream().filter(c -> c.isFixedTool())
+				.collect(Collectors.toCollection(ArrayList::new));
+
+		if (sameRolePlayers.isEmpty() || fixCards.isEmpty())
+			return false;
+
+		// heilige
+		for (Player player : sameRolePlayers) {
+			for (Card card : fixCards) {
+				// double cast weil warum nicht
+				FixedToolCard fTCard = (FixedToolCard) (ActionCard) card;
+				for (ToolType toolType : fTCard.getToolTypes()) {
+					if (player.hasBrokenTool(toolType)) {
+						BrokenToolCard brokenToolCard = player.getBrokenTool(toolType);
+						selectCard(card);
+						GameController.fixBrokenToolCardWithSelectedCard(player, brokenToolCard);
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	// schaut sich einer der Zielkarten an
+	protected boolean lookAtGoalCard() {
+		ArrayList<Card> cards = handCards.stream().filter(c -> c.isMap())
+				.collect(Collectors.toCollection(ArrayList::new));
+
+		if (cards.isEmpty())
+			return false;
+
+		Collections.shuffle(goalCardPositions);
+
+		selectCard(cards.get(0));
+		Position thisGoalCardsPosition = goalCardPositions.get(0);
+		GoalCard goalCard = (GoalCard) (GameController.getCardAt(thisGoalCardsPosition));
+
+		switch (role) {
+		case GOLD_MINER:
+
+			// Falls die ZielKarte eine Goldkarte ist, entfernt man beide anderen Zielkarten
+			// aus dem Array
+			if (goalCard.getType() == Type.Gold) {
+				goalCardPositions = new ArrayList<Position>();
+				goalCardPositions.add(thisGoalCardsPosition);
+				useMap = false;
+			} else {
+				goalCardPositions.remove(0);
+			}
+
+			break;
+		case STONE_MINER:
+			// Falls die ZielKarte eine Goldkarte ist, entfernt man diese aus dem Array
+			if (goalCard.getType() == Type.Gold) {
+				goalCardPositions.remove(0);
+				useMap = false;
+			}
+			break;
+		default:
+			return false;
+		}
+
+		GameController.lookAtGoalCardWithSelectedCard(goalCard);
+
+		return true;
+	}
+
+
+	//nicht fertig
+	protected boolean useRockFallCard() {
+		RockfallCard card = (RockfallCard) handCards.stream().filter(c -> c.isRockfall())
+				.findFirst().orElse(null);
+		
+		if (card == null)
+			return false;
+		
+		return false;
+	}
+
+	class PathCardInfo {
+		public PathCard pathCard;
+		public double distance;
+		public Position position;
+
+		public boolean inPlay;
+
+		public PathCardInfo(PathCard pathCard, double distance, Position position, boolean inPlay) {
+			this.pathCard = pathCard;
+			this.distance = distance;
+			this.position = position;
+			this.inPlay = inPlay;
+		}
+	}
 }
