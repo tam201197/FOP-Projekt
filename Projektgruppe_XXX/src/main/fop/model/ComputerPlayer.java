@@ -107,33 +107,48 @@ public class ComputerPlayer extends Player {
 		// Sie dürfen diese Methode vollständig umschreiben und den vorhandenen Code
 		// entfernen.
 
-		if (useMap){
-		if (lookAtGoalCard())
-			return;
+		if (useMap) {
+			if (lookAtGoalCard())
+				return;
 		}
 
-		if (repairTool())
-			;
-		else if (breakRandomTool())
-			;
-		else if (placePathCard())
-			;
-		else
-			discardRandomCard();
+		// Prioritäten als nicht Saboteur
+		if (role != Role.SABOTEUR) {
+			if (repairTool())
+				;
+			else if (breakRandomTool())
+				;
+			else if (placePathCard())
+				;
+			else
+				discardUselessCardNotSaboteur();
+			// Prioritäten als Saboteur
+		} else {
+			if (breakRandomTool())
+				;
+			else if (repairTool())
+				;
+			else if (placePathCard())
+				;
+			else
+				discardUselessCardSaboteur();
+		}
+
 	}
 
 	// Beim Aufruf dieser Methode wird versucht möglichst gut in Richtung Zielkarte
 	// zu bauen
 	protected boolean placePathCard() throws FileNotFoundException {
 
-		ArrayList<Card> pathCards = handCards.stream().filter(c -> c.isPathCard())
+		if (this.hasBrokenTool())
+			return false;
+
+		ArrayList<Card> pathCards = handCards.stream()
+				.filter(c -> c.isPathCard() && !c.getName().startsWith("dead") && role != Role.SABOTEUR || c.getName().startsWith("dead") && role == Role.SABOTEUR)
 				.collect(Collectors.toCollection(ArrayList::new));
 
-		// Zur Sicherheit, wird später geändert
-		if (pathCards.isEmpty()) {
-			discardRandomCard();
+		if (pathCards.isEmpty())
 			return false;
-		}
 
 		var board = GameController.getGameboard().getBoard();
 
@@ -148,7 +163,9 @@ public class ComputerPlayer extends Player {
 		if (pCIList.isEmpty())
 			return false;
 
+		Collections.shuffle(pCIList);
 		PathCardInfo optimalPathCard = pCIList.get(0);
+
 		for (PathCardInfo pCI : pCIList) {
 			if (pCI.distance < optimalPathCard.distance)
 				optimalPathCard = pCI;
@@ -169,6 +186,7 @@ public class ComputerPlayer extends Player {
 	 */
 	protected PathCardInfo optimalPathCard(PathCard card, Map<Position, PathCard> board) {
 		PathCardInfo pCI = new PathCardInfo(card, 0, null, false);
+		double dst = Double.MAX_VALUE;
 
 		for (Position pos : board.keySet()) {
 			for (int y = -1; y <= 1; y++) {
@@ -178,10 +196,7 @@ public class ComputerPlayer extends Player {
 
 						Graph<CardAnchor> graph = card.getGraph();
 						Set<CardAnchor> ancher = graph.vertices();
-						
-						double dst = 0;
-						if (role != Role.SABOTEUR)
-							 dst = Double.MAX_VALUE;
+
 						
 						// Für jeden Anker wird die Distanz für jede adjacent Position mit jeder
 						// Zielkarte berechnet und die kleinste genommen
@@ -192,21 +207,11 @@ public class ComputerPlayer extends Player {
 								double newDst = distance(
 										cardAnchor.getAdjacentPosition(Position.of(pos.x() + x, pos.y() + y)), secPos);
 
-								if (role != Role.SABOTEUR) {
-									if (newDst < dst) {
-										pCI.distance = newDst;
-										pCI.position = Position.of(x + pos.x(), y + pos.y());
-										pCI.inPlay = true;
-										dst = newDst;
-									}
-								} else {
-									//Wenn Saboteur, so weit wie möglich wegbauen
-									if (newDst > dst) {
-										pCI.distance = newDst;
-										pCI.position = Position.of(x + pos.x(), y + pos.y());
-										pCI.inPlay = true;
-										dst = newDst;
-									}
+								if (newDst < dst) {
+									pCI.distance = newDst;
+									pCI.position = Position.of(x + pos.x(), y + pos.y());
+									pCI.inPlay = true;
+									dst = newDst;
 								}
 							}
 						}
@@ -226,6 +231,34 @@ public class ComputerPlayer extends Player {
 		return Math.sqrt(x + y);
 	}
 
+	protected void discardUselessCardNotSaboteur() throws FileNotFoundException{
+		ArrayList<Card> uselessCards = handCards.stream().filter(c -> c.isMap() && !useMap || c.getName().startsWith("dead"))
+		.collect(Collectors.toCollection(ArrayList::new));
+
+		if (uselessCards.isEmpty()){
+			discardRandomCard();
+			return;
+		}
+
+		Card card = uselessCards.get((int) (Math.random() * uselessCards.size()));
+		selectCard(card);
+		GameController.discardSelectedCard();
+	}
+
+	protected void discardUselessCardSaboteur() throws FileNotFoundException{
+		ArrayList<Card> uselessCards = handCards.stream().filter(c -> c.isMap() || !c.getName().startsWith("dead"))
+		.collect(Collectors.toCollection(ArrayList::new));
+
+		if (uselessCards.isEmpty()){
+			discardRandomCard();
+			return;
+		}
+
+		Card card = uselessCards.get((int) (Math.random() * uselessCards.size()));
+		selectCard(card);
+		GameController.discardSelectedCard();
+	}
+
 	protected void discardRandomCard() throws FileNotFoundException {
 
 		// erhalte zufällige Handkarte
@@ -239,8 +272,8 @@ public class ComputerPlayer extends Player {
 		GameController.discardSelectedCard();
 	}
 
-	// macht ein zufälliges Werkzeug von einem zufälligem Spieler kapput, der nicht
-	// die selbe Rolle hat
+	// macht ein zufälliges Werkzeug von einem zufälligem Spieler kaputt, der nicht
+	// die selbe Rolle hat, falls die Möglichkeit da ist
 	protected boolean breakRandomTool() {
 		ArrayList<Card> lockCards = handCards.stream().filter(c -> c.isBrokenTool())
 				.collect(Collectors.toCollection(ArrayList::new));
@@ -344,15 +377,13 @@ public class ComputerPlayer extends Player {
 		return true;
 	}
 
-
-	//nicht fertig
+	// nicht fertig
 	protected boolean useRockFallCard() {
-		RockfallCard card = (RockfallCard) handCards.stream().filter(c -> c.isRockfall())
-				.findFirst().orElse(null);
-		
+		RockfallCard card = (RockfallCard) handCards.stream().filter(c -> c.isRockfall()).findFirst().orElse(null);
+
 		if (card == null)
 			return false;
-		
+
 		return false;
 	}
 
