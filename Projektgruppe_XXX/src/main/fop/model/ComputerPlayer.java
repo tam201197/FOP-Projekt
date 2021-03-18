@@ -120,11 +120,15 @@ public class ComputerPlayer extends Player {
 				;
 			else if (placePathCard())
 				;
+			else if (useRockFallCard())
+				;
 			else
 				discardUselessCardNotSaboteur();
 			// Prioritäten als Saboteur
 		} else {
 			if (breakRandomTool())
+				;
+			else if (useRockFallCard())
 				;
 			else if (repairTool())
 				;
@@ -377,14 +381,45 @@ public class ComputerPlayer extends Player {
 		return true;
 	}
 
-	// nicht fertig
+	// Macht eine PfadKarte kaputt
+	// Als Saboteur, zerstört nur nicht Dead End Karten
+	// Als nicht Saboteur, zerstört nur Dead End Karten
 	protected boolean useRockFallCard() {
 		RockfallCard card = (RockfallCard) handCards.stream().filter(c -> c.isRockfall()).findFirst().orElse(null);
 
 		if (card == null)
 			return false;
 
+
+		double dst = Double.MAX_VALUE;
+		Position destroyAtPos = null;
+
+		var board = GameController.getGameboard().getBoard();
+		for (Position pos : board.keySet()) {
+
+			PathCard thisCard = GameController.getCardAt(pos);
+			if (thisCard.getName().startsWith("dead") && role == Role.SABOTEUR || thisCard.isGoalCard()  || thisCard.isStartCard())
+				continue;
+			
+			if (!thisCard.getName().startsWith("dead") && role != Role.SABOTEUR || thisCard.isGoalCard()  || thisCard.isStartCard())
+				continue;
+
+				for (Position goalCardPos : goalCardPositions){
+					double dstBetween = distance(pos, goalCardPos);
+					if (dstBetween < dst){
+						dst = dstBetween;
+						destroyAtPos = pos;
+					}
+
+				}
+		}
+
+		if (destroyAtPos == null)
 		return false;
+
+		selectCard(card);
+		GameController.destroyCardWithSelectedCardAt(destroyAtPos.x(), destroyAtPos.y());
+		return true;
 	}
 
 	class PathCardInfo {
