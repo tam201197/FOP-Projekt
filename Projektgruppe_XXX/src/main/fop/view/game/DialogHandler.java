@@ -24,7 +24,7 @@ import javax.swing.table.DefaultTableModel;
 public final class DialogHandler {
 	
 	/** Kann genutzt werden, um unerwünschte Dialoge während der Entwicklung auszublenden. */
-	private static final boolean DISABLE_DIALOGS = false;
+	private static final boolean DISABLE_DIALOGS = true;
 	
 	private final Component parent;
 	

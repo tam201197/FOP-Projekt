@@ -276,8 +276,7 @@ public class ComputerPlayer extends Player {
 		GameController.discardSelectedCard();
 	}
 
-	// macht ein zufälliges Werkzeug von einem zufälligem Spieler kaputt, der nicht
-	// die selbe Rolle hat, falls die Möglichkeit da ist
+	// macht ein zufälliges Werkzeug von einem anderem zufälligem Spieler kaputt falls die Möglichkeit da ist
 	protected boolean breakRandomTool() {
 		ArrayList<Card> lockCards = handCards.stream().filter(c -> c.isBrokenTool())
 				.collect(Collectors.toCollection(ArrayList::new));
@@ -288,9 +287,9 @@ public class ComputerPlayer extends Player {
 		// erhalte zufällige BreakKarte
 		Card card = lockCards.get((int) (Math.random() * lockCards.size()));
 
-		// erhalte Spieler, die nicht der Spieler am Zug sind
+		// erhalte Spieler, die nicht der Spieler am Zug sind und mit der ausgewählten Karte beschädigt werden können
 		ArrayList<Player> players = Arrays.asList(GameController.getPlayers()).stream()
-				.filter(p -> p != this && p.canToolBeBroken((BrokenToolCard) card) && this.role != p.role)
+				.filter(p -> p != this && p.canToolBeBroken((BrokenToolCard) card))
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		if (players.isEmpty())
@@ -306,33 +305,32 @@ public class ComputerPlayer extends Player {
 		return true;
 	}
 
-	// repariert ein Tool von sich oder Spielern selber Rolle, falls die Möglichkeit
-	// da ist
+	// repariert ein Tool von sich oder Spielern selber Rolle, falls die Möglichkeit bestehtSS
 	protected boolean repairTool() {
-		ArrayList<Player> sameRolePlayers = Arrays.asList(GameController.getPlayers()).stream()
-				.filter(p -> p.role == this.role && p.hasBrokenTool()).collect(Collectors.toCollection(ArrayList::new));
-
+		
+		if (!this.hasBrokenTool())
+			return false;
+		
 		ArrayList<Card> fixCards = handCards.stream().filter(c -> c.isFixedTool())
 				.collect(Collectors.toCollection(ArrayList::new));
 
-		if (sameRolePlayers.isEmpty() || fixCards.isEmpty())
+		if (fixCards.isEmpty())
 			return false;
 
 		// heilige
-		for (Player player : sameRolePlayers) {
 			for (Card card : fixCards) {
 				// double cast weil warum nicht
 				FixedToolCard fTCard = (FixedToolCard) (ActionCard) card;
 				for (ToolType toolType : fTCard.getToolTypes()) {
-					if (player.hasBrokenTool(toolType)) {
-						BrokenToolCard brokenToolCard = player.getBrokenTool(toolType);
+					if (this.hasBrokenTool(toolType)) {
+						BrokenToolCard brokenToolCard = this.getBrokenTool(toolType);
 						selectCard(card);
-						GameController.fixBrokenToolCardWithSelectedCard(player, brokenToolCard);
+						GameController.fixBrokenToolCardWithSelectedCard(this, brokenToolCard);
 						return true;
 					}
 				}
 			}
-		}
+		
 
 		return false;
 	}
@@ -410,7 +408,6 @@ public class ComputerPlayer extends Player {
 						dst = dstBetween;
 						destroyAtPos = pos;
 					}
-
 				}
 		}
 
